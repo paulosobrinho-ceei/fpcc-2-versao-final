@@ -1,0 +1,532 @@
+---
+title: "Projeto Versão Final"
+output: html_document
+---
+
+<!--```{r echo=FALSE, message=FALSE, warning=FALSE} -->
+
+
+```{r}
+library(tidyverse)
+library(here)
+library(tidyr)
+library(broom)
+library(grid)
+
+library(tidyverse)
+theme_set(theme_bw())
+
+library(ggbeeswarm)
+library(gridExtra)
+
+library(broom)
+
+
+library(here)
+library(tidyr)
+library(broom)
+library(boot)
+
+```
+
+
+```{r}
+dados = read_csv(
+  here("data/dados-extraidos.csv"),
+  col_types =
+    cols(
+      Project = col_character(),
+      Commits = col_double(),
+      Developers = col_double(),
+      Ocurr_nd = col_double(),
+      Devs_nd = col_double(),
+      Floss_nd = col_double(),
+      Root_nd = col_double(),
+      Ocurr_d = col_double(),
+      Devs_d = col_double(),
+      Floss_d = col_double(),
+      Root_d = col_double(),
+      Total_Ocorr = col_double()
+    )
+)
+
+glimpse(dados)
+
+```
+
+<!--
+
+lllllllllllllllllllllllllllllllllllllllllllllllllll
+
+-->
+
+```{r message=TRUE}
+dados_tabela2 = dados
+```
+
+```{r}
+summary(dados_tabela2)
+```
+
+
+---
+
+
+Correlação
+
+---
+
+
+```{r}
+
+#A correlação entre a quantidade de commits e Disciplinado
+#A correlação entre a quantidade de commits e Não Disciplinado
+
+correlacao_Commits_AnotacaoNaoDiscipilinadas = dados_tabela2 %>%
+      summarise(correlacao = cor(Commits, Ocurr_nd, method = "pearson"))%>%
+    pull(correlacao)
+
+correlacao_Commits_AnotacaoDiscipilinadas   = dados_tabela2 %>%
+    summarise(correlacao = cor(Commits, Ocurr_d, method = "pearson"))%>%
+    pull(correlacao)
+
+
+pA1 = dados_tabela2 %>% 
+      ggplot(aes(x = Commits, y = Ocurr_nd)) + 
+      geom_point(alpha = .4, color = "green") +
+      geom_vline (xintercept = mean (dados_tabela2$Commits), color = "red") +
+      geom_hline (yintercept = mean (dados_tabela2$Ocurr_nd), color = "red") +
+      geom_smooth(method=lm, se=FALSE) +
+      annotate(geom = "text", x = 560, y = 4.9, label = paste("r = ", round(correlacao_Commits_AnotacaoNaoDiscipilinadas, 3)))
+
+
+pA2 = dados_tabela2 %>% 
+      ggplot(aes(x = Commits, y = Ocurr_d)) + 
+      geom_point(alpha = .4, color = "green") +
+      geom_vline (xintercept = mean (dados_tabela2$Commits), color = "red") +
+      geom_hline (yintercept = mean (dados_tabela2$Ocurr_d), color = "red") +
+      geom_smooth(method=lm, se=FALSE) +
+      annotate(geom = "text", x = 530, y = 3.9, label = paste("r = ", round(correlacao_Commits_AnotacaoDiscipilinadas, 3)))
+  
+
+#grid.arrange(pA1, pA2, ncol = 2)
+
+```
+
+
+```{r}
+
+#A correlação entre a quantidade de desenvolvedores e Disciplinado
+#A correlação entre a quantidade de desenvolvedores e Não Disciplinado
+
+correlacao_Developers_AnotacaoNaoDiscipilinadas = dados_tabela2 %>%
+      summarise(correlacao = cor(Developers, Ocurr_nd, method = "pearson"))%>%
+    pull(correlacao)
+
+correlacao_Developers_AnotacaoDiscipilinadas   = dados_tabela2 %>%
+    summarise(correlacao = cor(Developers, Ocurr_d, method = "pearson"))%>%
+    pull(correlacao)
+
+
+pB1 = dados_tabela2 %>% 
+      ggplot(aes(x = Developers, y = Ocurr_nd)) + 
+      geom_point(alpha = .4, color = "green") +
+      geom_vline (xintercept = mean (dados_tabela2$Developers), color = "red") +
+      geom_hline (yintercept = mean (dados_tabela2$Ocurr_nd), color = "red") +
+      geom_smooth(method=lm, se=FALSE) +
+      annotate(geom = "text", x = 560, y = 4.9, label = paste("r = ", round(correlacao_Developers_AnotacaoNaoDiscipilinadas, 3)))
+
+
+pB2 = dados_tabela2 %>% 
+      ggplot(aes(x = Developers, y = Ocurr_d)) + 
+      geom_point(alpha = .4, color = "green") +
+      geom_vline (xintercept = mean (dados_tabela2$Developers), color = "red") +
+      geom_hline (yintercept = mean (dados_tabela2$Ocurr_d), color = "red") +
+      geom_smooth(method=lm, se=FALSE) +
+      annotate(geom = "text", x = 530, y = 3.9, label = paste("r = ", round(correlacao_Developers_AnotacaoDiscipilinadas, 3)))
+  
+
+#grid.arrange(pB1, pB2, ncol = 2)
+
+```
+
+```{r}
+
+#A correlação entre a commits e macros
+
+correlacao_Commits_Macros = dados_tabela2 %>%
+      summarise(correlacao = cor(Commits, Total_Ocorr, method = "pearson"))%>%
+    pull(correlacao)
+
+correlacao_Developers_AnotacaoDiscipilinadas   = dados_tabela2 %>%
+    summarise(correlacao = cor(Developers, Total_Ocorr, method = "pearson"))%>%
+    pull(correlacao)
+
+
+pC1 = dados_tabela2 %>% 
+      ggplot(aes(x = Commits, y = Total_Ocorr)) + 
+      geom_point(alpha = .4, color = "green") +
+      geom_vline (xintercept = mean (dados_tabela2$Commits), color = "red") +
+      geom_hline (yintercept = mean (dados_tabela2$Total_Ocorr), color = "red") +
+      geom_smooth(method=lm, se=FALSE) +
+      annotate(geom = "text", x = 560, y = 7.9, label = paste("r = ", round(correlacao_Commits_Macros, 3)))
+
+
+pC2 = dados_tabela2 %>% 
+      ggplot(aes(x = Developers, y = Total_Ocorr)) + 
+      geom_point(alpha = .4, color = "green") +
+      geom_vline (xintercept = mean (dados_tabela2$Developers), color = "red") +
+      geom_hline (yintercept = mean (dados_tabela2$Total_Ocorr), color = "red") +
+      geom_smooth(method=lm, se=FALSE) +
+      annotate(geom = "text", x = 760, y = 7.9, label = paste("r = ", round(correlacao_Developers_AnotacaoDiscipilinadas, 3)))
+  
+
+#grid.arrange(pC1, pC2, ncol = 2)
+
+```
+
+
+```{r}
+grid.arrange(pA1, pA2, pB1, pB2, pC1, pC2, ncol = 2, nrow = 3)
+```
+
+---
+
+Todas as correlações foram negativas, ou seja, as variáveis variam em sentido contrário. Se X aumenta, Y está diminuindo. E as correlações foram muito pequenas e próxima de zero. Ou seja, indicando uma associação linear fraca entres as várias.
+
+---
+
+
+
+```{r}
+# Será unido os dados do tipo de anotacao e a quantidade de macros
+# será criadno um campo com o nome da anotacao nd d e a quantidade de macros
+
+dados_tabela2_NaoDisciplinado = dados_tabela2 %>%
+  mutate(TipoAnotacao = "Não Disciplinada", Ocorr_nd_d = Ocurr_nd) %>%
+  select(Project, TipoAnotacao, Ocorr_nd_d)
+
+dados_tabela2_Disciplinado = dados_tabela2 %>%
+  mutate(TipoAnotacao = 'Disciplinada', Ocorr_nd_d = Ocurr_d) %>%
+  select(Project, TipoAnotacao, Ocorr_nd_d)
+
+dados_tabela2_anotacoes = bind_rows(dados_tabela2_NaoDisciplinado, dados_tabela2_Disciplinado)
+dados_tabela2_anotacoes
+```
+
+
+---
+
+A seguir são apresentados através do gráfico representado pelas frequências da Ocorr_nd_d para cada TipoAnotacao para melhor compreensão da distribuição das informações extraída.
+
+---
+
+```{r}
+dados_tabela2_anotacoes %>%
+  ggplot(aes(y = Ocorr_nd_d, color = Project)) +  
+  geom_histogram(binwidth = .2, alpha = .4, boundary = 0) +
+  geom_rug() +
+  facet_grid(TipoAnotacao ~., scales = "free_y") +
+  labs(title = "Distribuição da Anotações") + 
+  theme(legend.position = "None")
+
+```
+
+
+---
+
+Desvio padrão para Anotações:
+
+---
+
+```{r paged.print=TRUE}
+Desvio_Padrao_D = dados_tabela2_anotacoes %>%
+  filter (TipoAnotacao == "Disciplinada") %>%
+  select (Ocorr_nd_d)
+  
+# Desvio padrão
+sd(Desvio_Padrao_D$Ocorr_nd_d)
+```
+```{r}
+Desvio_Padrao_ND = dados_tabela2_anotacoes %>%
+  filter (TipoAnotacao == "Não Disciplinada") %>%
+  select (Ocorr_nd_d)
+  
+# Desvio padrão
+sd(Desvio_Padrao_ND$Ocorr_nd_d)
+```
+
+---
+
+Total de registros:
+
+---
+
+```{r}
+Total =  length(dados_tabela2_anotacoes$Ocorr_nd_d)
+Total
+
+```
+
+---
+
+Para realização da estimará ICs usando bootstrap são coletadas as informações apresentadas nesta seção, no qual são realizadas as organizações em tabelas  dos tipos de anotações, quantidade e percentual, além que são realizados os cálculos necessários.
+
+---
+
+
+```{r}
+dados_tabela2_anotacoes %>% 
+     count(TipoAnotacao) %>% mutate (Percentual = round ((n / Total) * 100))
+```
+
+```{r}
+agrupado = dados_tabela2_anotacoes %>% 
+    group_by(TipoAnotacao) %>% 
+    summarise(media = mean(Ocorr_nd_d),  .groups = "drop")
+agrupado
+```
+
+
+
+```{r}
+a = agrupado %>% filter(TipoAnotacao == "Disciplinada")         %>% pull(media)
+b = agrupado %>% filter(TipoAnotacao == "Não Disciplinada")     %>% pull(media)
+b - a
+```
+
+```{r}
+comparacao1 = dados_tabela2_anotacoes %>% 
+    filter(TipoAnotacao %in% c("Disciplinada", "Não Disciplinada"))
+    
+
+theta1 <- function(d, i) {
+    agrupado = d %>% 
+        slice(i) %>% 
+        group_by(TipoAnotacao) %>% 
+        summarise(media = mean(Ocorr_nd_d))
+        a = agrupado %>% filter(TipoAnotacao == "Disciplinada")         %>% pull(media)
+        b = agrupado %>% filter(TipoAnotacao == "Não Disciplinada")     %>% pull(media)
+        b - a
+}
+
+theta1(comparacao1, i = 1:NROW(comparacao1))
+
+```
+
+```{r}
+ci1 = boot(data = comparacao1,
+           statistic = theta1,
+           R = 2000) %>%    
+    tidy(conf.level = .95,
+         conf.method = "bca",
+         conf.int = TRUE) %>%
+    
+    mutate (tamanho_conf.high_conf.low = conf.high - conf.low)
+
+ci1
+```
+
+
+--- 
+
+Para a visualização dos efeitos de interesse para a comparação entre as duas anotações é realizado a diferença entre a média do TipoAnotacao de Ocorr_nd_n. Os gráficos contém a "Ocorr a cada TipoAnotacao", " com médias e medianas a cada TipoAnotacao" e "Diferença das médias" em que são apresentados contendo as informações já calculadas do campo Ocorr, suas médias (em vermelho) e medianas (em azul). Também contém a diferença para os TipoAnotacao "Não Disciplinada - Disciplinada"
+
+---
+
+
+---
+
+A diferença da média de "Disciplinada" - "Não Disciplinada"
+
+---
+
+
+```{r}
+p1 = comparacao1 %>% 
+    ggplot(aes(x = TipoAnotacao, y = Ocorr_nd_d)) + 
+    geom_quasirandom(width = .2, position = "quasirandom") +
+    labs(x = "Ocorr_nd_d", 
+         y = "Ocorr_nd_d a cada TipoAnotação")
+
+p2 = comparacao1 %>% 
+    ggplot(aes(x = TipoAnotacao, y = Ocorr_nd_d)) + 
+    geom_quasirandom(width = .2, position = "quasirandom") + 
+    stat_summary(geom = "point", fun = "mean", color = "red", size = 5) +
+    stat_summary(geom = "point", fun = "median", color = "blue", size = 5) +
+    labs(x = "TipoAnotação", 
+         y = "Ocorr_nd_d com médias e medianas a cada TipoAnotação")
+    
+
+p3 = ci1 %>%
+    ggplot(aes(
+        x = "",
+        y = statistic,
+        ymin = conf.low,
+        ymax = conf.high
+    )) +
+    geom_pointrange(color = "coral") +
+    geom_point(size = 3, color = "red") + 
+    scale_y_continuous(limits = c(-4, 4)) + 
+    labs(x = "Diferença das médias", 
+         y = "[+]Não Disciplinada - Disciplinada[-]")
+
+grid.arrange(p1, p2, p3, ncol = 3)
+
+```
+
+
+
+---
+
+**Conclusão sobre a interpretação das informações apresentadas nesta seção TipoAnotacao "Não Disciplinada - Disciplinada"**
+
+Tomando como base o estudo original aplicada para determinada finalidade acadêmica, , analisou-se as informações sobre o tamanho do efeito dos tipos de anotações comparada com a Disciplinada e Não Disciplinada. 
+
+Para isto, foram observados a população N = 37, obtido a amostras n = 74, que foram dividas em dois grupos através dos seus respectivo campo de anotações "Não Disciplinado" = 37 (50%) e "Disciplinado" = 37 (50%), a representatividade a ser comparada que determinada a relação dos dados são apresentadas pelo campo TipoAnotacao no qual todas estas informações são fornecidas através do histórico de commits dos códigos-fontes dos sistemas configuráveis através do GitHub que foram disponbilizadas estas informações em formato de tabela.
+
+Inicialmente, através do campo Ocorr_nd_n, os dois gráficos da Distribuição da Anotações está entre os valores entre 0 e 13. 
+
+No gráfico Distribuição da Anotações pode ser melhor observado maior concentração da satisfaction nos valores na ordem  para o grupo Não Disciplinado. Em ambos gupos há maior concentração de valores entre 0 e 2 para muito projetos. As informações também pode ser observado através das médias Não Disciplinada=3.30 e Disciplinada=1.92 de maneira comparativa ambas as distribuições.
+
+
+Após a realização dos procedimentos necessários foram obtidos para  TipoAnotacaoos valores do Desvio Padrão para o grupos "Não Disciplinada" = 3.799597 e Desvio Padrão para o "Disciplinada" = 3.303015. A média para os grupos Não Disciplinada=3.30 e Disciplinada=1.92, neste contexto o "Não Disciplinada" foi o possui maior média. E a diferença média ("Não Disciplinada" - "Disciplinada") resultou em 1.38. No gráfico "Ocorr_nd_d com médias e medianas a cada TipoAnotação" com médias e medianas a cada TipoAnotacao foi realizado a média e a mediana no qual os seus valores teve considerável variações, principalmente para o grupo "Não Disciplinada", sendo que no geral a média e a mediana contém valores distantes, por isso, foi realizado o uso da média. No caso da diferença entre as médias e mediana pelo que foi observado ocorreu por causa, valores da Ocorr_nd_d são altos comparados aos demais o que pode ter influenciado para a diferença.
+
+No gráfico "Diferença das médias" a cada TipoAnotação mostra [+]Não Disciplinada - Disciplinada[-] é ilustrado e apresentadas as seguinte informações:
+
+Em média, as anotações estudadas no experimento tiveram uma TipoAnotação implícita  com a "Não Disciplinada" no qual o se efeito foi positiva e considerável no intervalo de Confiança 95%, statistic=1.38, conf.low=-0.298, conf.high=2.91, tamanho_conf.high_conf.low=3.21. Os dados deste experimento mostram através da reta vertical de (tamanho conf.high - conf.low) = 3.21 indica intervalo de confiança e seus respectivos valores inferiores e superiores, portanto, baseado nestas informações os experimentos indicam que a efeito foi positiva e considerável=1.38, mas,ainda não é relevante.
+
+---
+
+
+```{r}
+#dados_tabela2_melhor = dados_tabela2 %>%
+#  mutate(TipoAnotacao = 'Não Disciplinada', Ocorr_nd_d = Ocurr_nd) %>%
+#  select(Project, TipoAnotacao, Ocorr_nd_d)
+
+
+```
+
+
+
+
+---
+
+Para realização da estimava ICs usando bootstrap foram realizadas diversas tentativas com os dados disponíveis e não foi possível ser relizado de maneira indêncio ao estudo Original, Entre o Macro(Total_Ocorr) dos Commits para cada projeto. Neste sentido, foi então realizado um tentativa no eixo x = Total_Ocorr / Commits, ou seja, seria a média, o no eixo y = Project. Sendo assim, são apresentado os respectivos resultados a seguir:
+
+---
+
+```{r}
+dados_tabela2 %>% ggplot(aes(x = Total_Ocorr / Commits, y = Project)) +
+#         geom_linerange(color = "green") +
+#        geom_point(color = "coral", size = 2) +
+        geom_point(size = 3) +  
+##        geom_point(aes(color=Project))+
+        #geom_point(aes(Project = 'Dia'), size = 5) +
+        #facet_grid(scenario ~., scales = "free_y") +
+        labs(x = "Commits", y = "Macros", title = "Gráfico - Dispersão") 
+#        coord_flip()
+
+```
+
+
+
+```{r}
+dados %>% 
+  count(Project)
+```
+
+```{r}
+dados_mineracao = dados %>% 
+  select (Total_Ocorr, Commits, Project) 
+
+glimpse(dados_mineracao)
+```
+
+
+```{r}
+theta <- function(d, i) {
+    agrupado = d %>% 
+        slice(i) %>% 
+        group_by(Project) %>% 
+        summarise(media = Total_Ocorr/Commits, .groups = "drop")
+        a = agrupado %>% pull(media)
+        a
+}
+
+booted <- boot(data = dados, 
+               statistic = theta, 
+               R = 2000)
+
+ci = tidy(booted, 
+          conf.level = .95,
+          conf.int = TRUE)
+
+glimpse(ci)
+```
+
+
+
+
+```{r}
+
+plot_ics = function(d) {
+    d %>%
+        ggplot(aes(
+            xmin = low,
+            x = mid,
+            xmax = high,
+            y = metodo
+        )) +
+                   
+        geom_linerange() +
+        geom_point(color = "coral", size = 3) +
+        scale_x_continuous(limits = c(-0.5, 5.5)) +
+        labs(y = "Commits", x = "Macros") 
+        
+}
+
+MetadeFator = 1.98
+tribble(
+    ~metodo, ~low, ~mid, ~high, 
+    dados_mineracao$Project[01], ci$conf.low [01], (ci$conf.high[01] - ci$conf.low [01]) / MetadeFator, ci$conf.high[01],     
+    dados_mineracao$Project[02], ci$conf.low [02], (ci$conf.high[02] - ci$conf.low [02]) / MetadeFator, ci$conf.high[02],     
+    dados_mineracao$Project[03], ci$conf.low [03], (ci$conf.high[03] - ci$conf.low [03]) / MetadeFator, ci$conf.high[03],     
+    dados_mineracao$Project[04], ci$conf.low [04], (ci$conf.high[04] - ci$conf.low [04]) / MetadeFator, ci$conf.high[04],
+    dados_mineracao$Project[05], ci$conf.low [05], (ci$conf.high[05] - ci$conf.low [05]) / MetadeFator, ci$conf.high[05],     
+    dados_mineracao$Project[06], ci$conf.low [06], (ci$conf.high[06] - ci$conf.low [06]) / MetadeFator, ci$conf.high[06],     
+    dados_mineracao$Project[07], ci$conf.low [07], (ci$conf.high[07] - ci$conf.low [07]) / MetadeFator, ci$conf.high[07],     
+    dados_mineracao$Project[08], ci$conf.low [08], (ci$conf.high[08] - ci$conf.low [08]) / MetadeFator, ci$conf.high[08],     
+    dados_mineracao$Project[09], ci$conf.low [09], (ci$conf.high[09] - ci$conf.low [09]) / MetadeFator, ci$conf.high[09],     
+    dados_mineracao$Project[10], ci$conf.low [10], (ci$conf.high[10] - ci$conf.low [10]) / MetadeFator, ci$conf.high[10],     
+    dados_mineracao$Project[11], ci$conf.low [11], (ci$conf.high[11] - ci$conf.low [11]) / MetadeFator, ci$conf.high[11],     
+    dados_mineracao$Project[12], ci$conf.low [12], (ci$conf.high[12] - ci$conf.low [12]) / MetadeFator, ci$conf.high[12],     
+    dados_mineracao$Project[13], ci$conf.low [13], (ci$conf.high[13] - ci$conf.low [13]) / MetadeFator, ci$conf.high[13],     
+    dados_mineracao$Project[14], ci$conf.low [14], (ci$conf.high[14] - ci$conf.low [14]) / MetadeFator, ci$conf.high[14],     
+    dados_mineracao$Project[15], ci$conf.low [15], (ci$conf.high[15] - ci$conf.low [15]) / MetadeFator, ci$conf.high[15],
+    dados_mineracao$Project[16], ci$conf.low [16], (ci$conf.high[16] - ci$conf.low [16]) / MetadeFator, ci$conf.high[16],
+    dados_mineracao$Project[17], ci$conf.low [17], (ci$conf.high[17] - ci$conf.low [17]) / MetadeFator, ci$conf.high[17],
+    dados_mineracao$Project[18], ci$conf.low [18], (ci$conf.high[18] - ci$conf.low [18]) / MetadeFator, ci$conf.high[18],
+    dados_mineracao$Project[19], ci$conf.low [19], (ci$conf.high[19] - ci$conf.low [19]) / MetadeFator, ci$conf.high[19],
+    dados_mineracao$Project[20], ci$conf.low [20], (ci$conf.high[20] - ci$conf.low [20]) / MetadeFator, ci$conf.high[20],
+    dados_mineracao$Project[21], ci$conf.low [21], (ci$conf.high[21] - ci$conf.low [21]) / MetadeFator, ci$conf.high[21],
+    dados_mineracao$Project[22], ci$conf.low [22], (ci$conf.high[22] - ci$conf.low [22]) / MetadeFator, ci$conf.high[22],
+    dados_mineracao$Project[23], ci$conf.low [23], (ci$conf.high[23] - ci$conf.low [23]) / MetadeFator, ci$conf.high[23],
+    dados_mineracao$Project[24], ci$conf.low [24], (ci$conf.high[24] - ci$conf.low [24]) / MetadeFator, ci$conf.high[24],
+    dados_mineracao$Project[25], ci$conf.low [25], (ci$conf.high[25] - ci$conf.low [25]) / MetadeFator, ci$conf.high[25],
+    dados_mineracao$Project[26], ci$conf.low [26], (ci$conf.high[26] - ci$conf.low [26]) / MetadeFator, ci$conf.high[26],
+    dados_mineracao$Project[27], ci$conf.low [27], (ci$conf.high[27] - ci$conf.low [27]) / MetadeFator, ci$conf.high[27],
+    dados_mineracao$Project[28], ci$conf.low [28], (ci$conf.high[28] - ci$conf.low [28]) / MetadeFator, ci$conf.high[28],
+    dados_mineracao$Project[29], ci$conf.low [29], (ci$conf.high[29] - ci$conf.low [29]) / MetadeFator, ci$conf.high[29],
+    dados_mineracao$Project[30], ci$conf.low [30], (ci$conf.high[30] - ci$conf.low [30]) / MetadeFator, ci$conf.high[30],
+    dados_mineracao$Project[31], ci$conf.low [31], (ci$conf.high[31] - ci$conf.low [31]) / MetadeFator, ci$conf.high[31],
+    dados_mineracao$Project[32], ci$conf.low [32], (ci$conf.high[32] - ci$conf.low [32]) / MetadeFator, ci$conf.high[32],
+    dados_mineracao$Project[33], ci$conf.low [33], (ci$conf.high[33] - ci$conf.low [33]) / MetadeFator, ci$conf.high[33],
+    dados_mineracao$Project[34], ci$conf.low [34], (ci$conf.high[34] - ci$conf.low [34]) / MetadeFator, ci$conf.high[34],
+    dados_mineracao$Project[35], ci$conf.low [35], (ci$conf.high[35] - ci$conf.low [35]) / MetadeFator, ci$conf.high[35],
+    dados_mineracao$Project[36], ci$conf.low [36], (ci$conf.high[36] - ci$conf.low [36]) / MetadeFator, ci$conf.high[36],
+    dados_mineracao$Project[37], ci$conf.low [37], (ci$conf.high[37] - ci$conf.low [37]) / MetadeFator, ci$conf.high[37]) %>% 
+    plot_ics()
+
+```
+Observando o Gráfico indica que os efeitos foram divididos em poucos grupos contém uma diferença grande entre o limite inferior e superior e mostra poucas informações que podem ser afirmadas para a maioria dos projetos.
